@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261/CodeChunks.db
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261/CodeChunks.db-shm
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261/CodeChunks.db-wal
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261/SemanticSymbols.db
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261/SemanticSymbols.db-shm
+/.vs/VideoSubtitleGenerator/CopilotIndices/17.14.734.62261/SemanticSymbols.db-wal
+/.vs/VideoSubtitleGenerator/FileContentIndex
+/.vs/VideoSubtitleGenerator/FileContentIndex/dab8fbcb-099d-4452-b3b8-2b52487f2e21.vsidx
+/.vs/VideoSubtitleGenerator/DesignTimeBuild/.dtbcache.v2
