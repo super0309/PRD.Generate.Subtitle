@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using VideoSubtitleGenerator.Core;
 
 namespace VideoSubtitleGenerator.UI.Wpf.Converters;
 
@@ -22,21 +23,29 @@ public class BoolToVisibilityConverter : IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        bool boolValue = false;
+        try
+        {
+            bool boolValue = false;
 
-        if (value is bool b)
-            boolValue = b;
-        else if (value != null)
-            bool.TryParse(value.ToString(), out boolValue);
+            if (value is bool b)
+                boolValue = b;
+            else if (value != null)
+                bool.TryParse(value.ToString(), out boolValue);
 
-        // Apply inversion if specified
-        if (IsInverted)
-            boolValue = !boolValue;
+            // Apply inversion if specified
+            if (IsInverted)
+                boolValue = !boolValue;
 
-        if (boolValue)
-            return Visibility.Visible;
-
+            if (boolValue)
+                return Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            Utilities.WriteToLog(ex);
+            //return false;
+        }
         return UseHidden ? Visibility.Hidden : Visibility.Collapsed;
+
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
+using VideoSubtitleGenerator.Core;
 
 namespace VideoSubtitleGenerator.UI.Wpf.Converters;
 
@@ -17,25 +18,33 @@ public class FileNameConverter : IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is string path && !string.IsNullOrEmpty(path))
+        try
         {
-            try
+            if (value is string path && !string.IsNullOrEmpty(path))
             {
-                if (IncludeExtension)
+                try
                 {
-                    return Path.GetFileName(path);
+                    if (IncludeExtension)
+                    {
+                        return Path.GetFileName(path);
+                    }
+                    else
+                    {
+                        return Path.GetFileNameWithoutExtension(path);
+                    }
                 }
-                else
+                catch
                 {
-                    return Path.GetFileNameWithoutExtension(path);
+                    return path; // Return original if parsing fails
                 }
             }
-            catch
-            {
-                return path; // Return original if parsing fails
-            }
-        }
 
+
+        }
+        catch (Exception ex)
+        {
+            Utilities.WriteToLog(ex);
+        }
         return string.Empty;
     }
 

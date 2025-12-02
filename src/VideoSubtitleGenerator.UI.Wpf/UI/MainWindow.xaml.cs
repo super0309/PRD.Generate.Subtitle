@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
+using VideoSubtitleGenerator.Core;
 using VideoSubtitleGenerator.UI.Wpf.ViewModels;
 
 namespace VideoSubtitleGenerator.UI.Wpf;
@@ -13,25 +14,18 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
 
-    public MainWindow()
+    // DI Constructor - MainViewModel will be injected
+    public MainWindow(MainViewModel viewModel)
     {
         try
         {
             System.Diagnostics.Debug.WriteLine("=== MainWindow Constructor START ===");
             
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+            System.Diagnostics.Debug.WriteLine($"✓ MainViewModel injected: {_viewModel != null}");
+            
             InitializeComponent();
             System.Diagnostics.Debug.WriteLine("=== InitializeComponent() completed ===");
-            
-            // Get ViewModel from DI (Service Locator pattern)
-            if (App.ServiceProvider == null)
-            {
-                System.Diagnostics.Debug.WriteLine("✗ ServiceProvider is NULL!");
-                throw new InvalidOperationException("ServiceProvider is not initialized!");
-            }
-            
-            System.Diagnostics.Debug.WriteLine("=== Getting MainViewModel from DI ===");
-            _viewModel = App.ServiceProvider.GetRequiredService<MainViewModel>();
-            System.Diagnostics.Debug.WriteLine($"✓ MainViewModel created: {_viewModel != null}");
             
             DataContext = _viewModel;
             System.Diagnostics.Debug.WriteLine("✓ DataContext set");
@@ -46,6 +40,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            Utilities.WriteToLog(ex);
             System.Diagnostics.Debug.WriteLine("=== MainWindow Constructor FAILED ===");
             System.Diagnostics.Debug.WriteLine($"✗ Error: {ex.GetType().Name}");
             System.Diagnostics.Debug.WriteLine($"✗ Message: {ex.Message}");
