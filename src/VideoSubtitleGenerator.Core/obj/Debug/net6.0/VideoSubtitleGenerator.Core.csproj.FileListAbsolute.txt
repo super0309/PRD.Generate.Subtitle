@@ -1,0 +1,12 @@
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\bin\Debug\net6.0\VideoSubtitleGenerator.Core.deps.json
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\bin\Debug\net6.0\VideoSubtitleGenerator.Core.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\bin\Debug\net6.0\VideoSubtitleGenerator.Core.pdb
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.csproj.AssemblyReference.cache
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.AssemblyInfoInputs.cache
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.AssemblyInfo.cs
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.csproj.CoreCompileInputs.cache
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\refint\VideoSubtitleGenerator.Core.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\VideoSubtitleGenerator.Core.pdb
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Core\obj\Debug\net6.0\ref\VideoSubtitleGenerator.Core.dll

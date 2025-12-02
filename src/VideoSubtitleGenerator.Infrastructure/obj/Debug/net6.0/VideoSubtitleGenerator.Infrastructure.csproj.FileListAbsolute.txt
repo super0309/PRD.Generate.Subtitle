@@ -1,0 +1,15 @@
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\bin\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.deps.json
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\bin\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\bin\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.pdb
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\bin\Debug\net6.0\VideoSubtitleGenerator.Core.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\bin\Debug\net6.0\VideoSubtitleGenerator.Core.pdb
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.csproj.AssemblyReference.cache
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.AssemblyInfoInputs.cache
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.AssemblyInfo.cs
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSub.04FA5177.Up2Date
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\refint\VideoSubtitleGenerator.Infrastructure.dll
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\VideoSubtitleGenerator.Infrastructure.pdb
+C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.Infrastructure\obj\Debug\net6.0\ref\VideoSubtitleGenerator.Infrastructure.dll

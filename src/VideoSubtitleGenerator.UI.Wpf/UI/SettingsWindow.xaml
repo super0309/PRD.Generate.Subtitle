@@ -1,0 +1,988 @@
+<Window x:Class="VideoSubtitleGenerator.UI.Wpf.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VideoSubtitleGenerator.UI.Wpf"
+        mc:Ignorable="d"
+        Title="Settings - Video Subtitle Generator" 
+        Height="700" 
+        Width="900"
+        MinHeight="600"
+        MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#FAFAFA"
+        ResizeMode="CanResize">
+    
+    <Window.Resources>
+        <!-- Button Style -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#BDBDBD"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F5F5F5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- GroupBox Header Style -->
+        <Style x:Key="GroupBoxHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#2196F3"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="SettingsLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Main Content with TabControl -->
+        <TabControl Grid.Row="0" 
+                    x:Name="mainTabControl"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="10">
+            
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="FontWeight" Value="Medium"/>
+                    <Setter Property="Padding" Value="20,12"/>
+                    <Setter Property="Foreground" Value="#757575"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border Name="Border" 
+                                        Background="Transparent"
+                                        BorderThickness="0,0,0,3"
+                                        BorderBrush="Transparent"
+                                        Margin="0,0,5,0">
+                                    <ContentPresenter x:Name="ContentSite"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    ContentSource="Header"
+                                                    Margin="{TemplateBinding Padding}"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="BorderBrush" Value="#2196F3"/>
+                                        <Setter Property="Foreground" Value="#2196F3"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#F5F5F5"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- ==================== TAB 1: GENERAL SETTINGS ==================== -->
+            <TabItem Header="🔧 Cấu hình nâng cao">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                            Padding="20">
+                    <StackPanel>
+                        
+                        <!-- Section: Advanced Configuration -->
+                        <TextBlock Text="🔧 Cấu hình nâng cao" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Python Path -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                         Text="Đường dẫn Python:"
+                                         Style="{StaticResource SettingsLabel}"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                       x:Name="txtPythonPath"
+                                       Text="{Binding PythonPath, UpdateSourceTrigger=PropertyChanged}"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       Margin="0,5,10,5"/>
+                                <Button Grid.Row="0" Grid.Column="2"
+                                      Content="Duyệt..."
+                                      Width="80"
+                                      Height="32"
+                                      Command="{Binding BrowsePythonCommand}"
+                                      Style="{StaticResource SecondaryButton}"
+                                      Margin="0,5,0,5"/>
+                                
+                                <CheckBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                                        Content="Tự động phát hiện"
+                                        IsChecked="{Binding AutoDetectPython}"
+                                        Margin="0,42,0,0"
+                                        Foreground="#2196F3"/>
+
+                                <!-- FFmpeg Path -->
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                         Text="Đường dẫn FFmpeg:"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,15,10,0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1"
+                                       x:Name="txtFFmpegPath"
+                                       Text="{Binding FFmpegPath, UpdateSourceTrigger=PropertyChanged}"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       Margin="0,15,10,5"
+                                       IsReadOnly="{Binding UseBundledFFmpeg}"
+                                       Background="#F5F5F5"/>
+                                <Button Grid.Row="1" Grid.Column="2"
+                                      Content="Duyệt..."
+                                      Width="80"
+                                      Height="32"
+                                      Command="{Binding BrowseFFmpegCommand}"
+                                      Style="{StaticResource SecondaryButton}"
+                                      Margin="0,15,0,5"/>
+                                
+                                <CheckBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                        Content="Sử dụng phiên bản đóng gói"
+                                        IsChecked="{Binding UseBundledFFmpeg}"
+                                        Margin="0,52,0,0"
+                                        Foreground="#2196F3"/>
+
+                                <!-- Script Path -->
+                                <TextBlock Grid.Row="2" Grid.Column="0"
+                                         Text="Đường dẫn Script:"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,15,10,0"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                       x:Name="txtScriptPath"
+                                       Text="python-worker/process_media.py"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       Margin="0,15,0,5"
+                                       IsReadOnly="True"
+                                       Background="#F5F5F5"/>
+
+                            </Grid>
+                        </Border>
+
+                        <!-- Section: Error Handling -->
+                        <TextBlock Text="⚙️ Xử lý lỗi" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Retry Count -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                         Text="Thử lại các tác vụ thất bại:"
+                                         Style="{StaticResource SettingsLabel}"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                       x:Name="txtRetryCount"
+                                       Text="3"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       HorizontalContentAlignment="Center"
+                                       Margin="0,5"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2"
+                                         Text="lần"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="10,0,0,0"/>
+
+                                <!-- Retry Delay -->
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                         Text="Độ trễ thử lại:"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,10,0,0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1"
+                                       x:Name="txtRetryDelay"
+                                       Text="5"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       HorizontalContentAlignment="Center"
+                                       Margin="0,10,0,5"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2"
+                                         Text="giây"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="10,10,0,0"/>
+
+                                <!-- Continue on Error -->
+                                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Tiếp tục khi có lỗi (bỏ qua các tệp bị lỗi)"
+                                        IsChecked="True"
+                                        Margin="0,20,0,5"/>
+
+                                <!-- Save Log -->
+                                <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Lưu nhật ký lỗi vào tệp"
+                                        IsChecked="True"
+                                        Margin="0,5,0,0"/>
+
+                            </Grid>
+                        </Border>
+
+                        <!-- Section: Logging -->
+                        <TextBlock Text="📝 Ghi nhật ký" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Log Level -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                         Text="Cấp độ nhật ký:"
+                                         Style="{StaticResource SettingsLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1"
+                                        x:Name="cmbLogLevel"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,5,10,5"
+                                        SelectedIndex="1">
+                                    <ComboBoxItem Content="Thông tin"/>
+                                    <ComboBoxItem Content="Debug"/>
+                                    <ComboBoxItem Content="Warning"/>
+                                    <ComboBoxItem Content="Error"/>
+                                </ComboBox>
+
+                                <!-- Log File Path -->
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                         Text="Tệp nhật ký:"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,10,0,0"/>
+                                <TextBox Grid.Row="1" Grid.Column="1"
+                                       x:Name="txtLogPath"
+                                       Text="logs/app.log"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       Margin="0,10,10,5"/>
+                                <Button Grid.Row="1" Grid.Column="2"
+                                      Content="Mở thư mục"
+                                      Width="100"
+                                      Height="32"
+                                      Style="{StaticResource SecondaryButton}"
+                                      Margin="0,10,0,5"/>
+
+                                <!-- Log to File -->
+                                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Ghi nhật ký vào tệp"
+                                        IsChecked="True"
+                                        Margin="0,15,0,5"/>
+
+                                <!-- Verbose Mode -->
+                                <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Chế độ chi tiết (gỡ lỗi)"
+                                        IsChecked="False"
+                                        Margin="0,5,0,0"/>
+
+                            </Grid>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ==================== TAB 2: WHISPER SETTINGS ==================== -->
+            <TabItem Header="🤖 Cài đặt Whisper">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                            Padding="20">
+                    <StackPanel>
+                        
+                        <!-- Section: Whisper AI Configuration -->
+                        <TextBlock Text="🤖 Cấu hình AI Whisper" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                
+                                <!-- Model Selection -->
+                                <TextBlock Text="Mô hình:" 
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,0,0,10"/>
+                                <ComboBox x:Name="cmbWhisperModel"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,0,0,15"
+                                        SelectedIndex="2">
+                                    <ComboBoxItem Content="tiny (fastest, lowest accuracy)"/>
+                                    <ComboBoxItem Content="base"/>
+                                    <ComboBoxItem Content="small (recommended, ~500MB)"/>
+                                    <ComboBoxItem Content="medium (~1.5GB RAM)"/>
+                                    <ComboBoxItem Content="large (slowest, best accuracy, ~3GB)"/>
+                                </ComboBox>
+
+                                <!-- Model Options -->
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,20">
+                                    <RadioButton Content="tiny" 
+                                               GroupName="ModelSize"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(fastest, lowest accuracy)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="base" 
+                                               GroupName="ModelSize"
+                                               Margin="0,5"/>
+                                    
+                                    <RadioButton Content="small" 
+                                               GroupName="ModelSize"
+                                               IsChecked="True"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(recommended, ~500MB)" 
+                                             FontSize="11" 
+                                             Foreground="#2196F3"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="medium" 
+                                               GroupName="ModelSize"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(~1.5GB RAM)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="large" 
+                                               GroupName="ModelSize"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(slowest, best accuracy, ~3GB)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                </StackPanel>
+
+                                <!-- Language -->
+                                <TextBlock Text="Ngôn ngữ:" 
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,10,0,10"/>
+                                <ComboBox x:Name="cmbLanguage"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,0,0,15"
+                                        SelectedIndex="0">
+                                    <ComboBoxItem Content="English"/>
+                                    <ComboBoxItem Content="Vietnamese"/>
+                                    <ComboBoxItem Content="Auto-detect"/>
+                                </ComboBox>
+
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,20">
+                                    <RadioButton Content="English" 
+                                               GroupName="Language"
+                                               IsChecked="True"
+                                               Margin="0,5"/>
+                                    <RadioButton Content="Vietnamese" 
+                                               GroupName="Language"
+                                               Margin="0,5"/>
+                                    <RadioButton Content="Auto-detect" 
+                                               GroupName="Language"
+                                               Margin="0,5"/>
+                                </StackPanel>
+
+                                <!-- Device -->
+                                <TextBlock Text="Thiết bị:" 
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,10,0,10"/>
+                                <ComboBox x:Name="cmbDevice"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,0,0,15"
+                                        SelectedIndex="0">
+                                    <ComboBoxItem Content="CPU (compatible with all)"/>
+                                    <ComboBoxItem Content="GPU (CUDA - faster, requires NVIDIA)"/>
+                                </ComboBox>
+
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,20">
+                                    <RadioButton Content="CPU" 
+                                               GroupName="Device"
+                                               IsChecked="True"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(compatible with all)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="GPU" 
+                                               GroupName="Device"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(CUDA - faster, requires NVIDIA)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                </StackPanel>
+
+                                <!-- Task -->
+                                <TextBlock Text="Nhiệm vụ:" 
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,10,0,10"/>
+                                
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                                    <RadioButton Content="Transcribe" 
+                                               GroupName="Task"
+                                               IsChecked="True"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(same language)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="Translate to English" 
+                                               GroupName="Task"
+                                               Margin="0,5"/>
+                                </StackPanel>
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Section: Output Format -->
+                        <TextBlock Text="📄 Định dạng đầu ra" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                
+                                <!-- Subtitle Format -->
+                                <TextBlock Text="Định dạng phụ đề:" 
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,0,0,10"/>
+                                <ComboBox x:Name="cmbSubtitleFormat"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,0,0,15"
+                                        SelectedIndex="0">
+                                    <ComboBoxItem Content="SRT (recommended)"/>
+                                    <ComboBoxItem Content="VTT (WebVTT)"/>
+                                    <ComboBoxItem Content="TXT (plain text)"/>
+                                    <ComboBoxItem Content="JSON (with timestamps)"/>
+                                </ComboBox>
+
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,20">
+                                    <RadioButton Content="SRT" 
+                                               GroupName="SubtitleFormat"
+                                               IsChecked="True"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(recommended)" 
+                                             FontSize="11" 
+                                             Foreground="#2196F3"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="VTT" 
+                                               GroupName="SubtitleFormat"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(WebVTT)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="TXT" 
+                                               GroupName="SubtitleFormat"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(plain text)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                    
+                                    <RadioButton Content="JSON" 
+                                               GroupName="SubtitleFormat"
+                                               Margin="0,5"/>
+                                    <TextBlock Text="(with timestamps)" 
+                                             FontSize="11" 
+                                             Foreground="#9E9E9E"
+                                             Margin="20,0,0,5"/>
+                                </StackPanel>
+
+                                <!-- Additional Options -->
+                                <CheckBox Content="Cũng lưu dưới dạng TXT"
+                                        IsChecked="True"
+                                        Margin="0,5"/>
+                                <CheckBox Content="Bao gồm điểm tin cậy"
+                                        IsChecked="False"
+                                        Margin="0,10,0,0"/>
+
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ==================== TAB 3: PROCESSING SETTINGS ==================== -->
+            <TabItem Header="⚙️ Xử lý">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                            Padding="20">
+                    <StackPanel>
+                        
+                        <!-- Section: Output Settings -->
+                        <TextBlock Text="📁 Cài đặt đầu ra" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Output Directory -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                         Text="Thư mục đầu ra:"
+                                         Style="{StaticResource SettingsLabel}"/>
+                                <TextBox Grid.Row="0" Grid.Column="1"
+                                       x:Name="txtOutputDirectory"
+                                       Text="C:\Output"
+                                       Height="32"
+                                       Padding="8,6"
+                                       VerticalContentAlignment="Center"
+                                       Margin="0,5,10,5"/>
+                                <Button Grid.Row="0" Grid.Column="2"
+                                      Content="Duyệt..."
+                                      Width="80"
+                                      Height="32"
+                                      Style="{StaticResource SecondaryButton}"
+                                      Margin="0,5,0,5"/>
+
+                                <!-- Auto-open Folder -->
+                                <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Tự động mở thư mục đầu ra sau khi hoàn thành"
+                                        IsChecked="True"
+                                        Margin="0,15,0,5"/>
+
+                                <!-- Delete WAV -->
+                                <CheckBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Xóa tệp WAV sau khi phiên âm"
+                                        IsChecked="True"
+                                        Margin="0,5"/>
+
+                                <!-- Create Subfolder -->
+                                <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                        Content="Tạo thư mục con cho mỗi video"
+                                        IsChecked="False"
+                                        Margin="0,5,0,0"/>
+
+                            </Grid>
+                        </Border>
+
+                        <!-- Section: Processing Mode -->
+                        <TextBlock Text="🎬 Chế độ xử lý" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                
+                                <RadioButton Content="Sequential (one at a time)"
+                                           GroupName="ProcessingMode"
+                                           IsChecked="True"
+                                           Margin="0,5"/>
+                                
+                                <RadioButton Content="Parallel (2 jobs)"
+                                           GroupName="ProcessingMode"
+                                           Margin="0,10,0,5"/>
+                                
+                                <RadioButton Content="Parallel (4 jobs)"
+                                           GroupName="ProcessingMode"
+                                           Margin="0,5"/>
+                                
+                                <RadioButton Content="Always ask me"
+                                           GroupName="ProcessingMode"
+                                           Margin="0,10,0,5"/>
+
+                                <Border Background="#FFF3E0" 
+                                        BorderBrush="#FFB300" 
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="10"
+                                        Margin="0,15,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="⚠" 
+                                                 FontSize="16" 
+                                                 Margin="0,0,10,0"
+                                                 VerticalAlignment="Center"/>
+                                        <TextBlock Text="Warning: Parallel requires 1GB+ RAM/job"
+                                                 FontSize="12"
+                                                 Foreground="#E65100"
+                                                 TextWrapping="Wrap"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Section: Audio Processing -->
+                        <TextBlock Text="🔊 Xử lý âm thanh" 
+                                 Style="{StaticResource GroupBoxHeaderStyle}"/>
+                        
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="20"
+                                Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Sample Rate -->
+                                <TextBlock Grid.Row="0" Grid.Column="0"
+                                         Text="Sample Rate:"
+                                         Style="{StaticResource SettingsLabel}"/>
+                                <ComboBox Grid.Row="0" Grid.Column="1"
+                                        x:Name="cmbSampleRate"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,5"
+                                        SelectedIndex="0">
+                                    <ComboBoxItem Content="16000 Hz"/>
+                                    <ComboBoxItem Content="22050 Hz"/>
+                                    <ComboBoxItem Content="44100 Hz"/>
+                                    <ComboBoxItem Content="48000 Hz"/>
+                                </ComboBox>
+
+                                <!-- Channels -->
+                                <TextBlock Grid.Row="1" Grid.Column="0"
+                                         Text="Channels:"
+                                         Style="{StaticResource SettingsLabel}"
+                                         Margin="0,10,0,0"/>
+                                <ComboBox Grid.Row="1" Grid.Column="1"
+                                        x:Name="cmbChannels"
+                                        Height="32"
+                                        VerticalContentAlignment="Center"
+                                        Margin="0,10,0,5"
+                                        SelectedIndex="0">
+                                    <ComboBoxItem Content="Mono"/>
+                                    <ComboBoxItem Content="Stereo"/>
+                                </ComboBox>
+
+                            </Grid>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ==================== TAB 4: ABOUT ==================== -->
+            <TabItem Header="ℹ️ Giới thiệu">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                            Padding="20">
+                    <StackPanel HorizontalAlignment="Center" 
+                              VerticalAlignment="Top"
+                              Margin="0,40,0,0">
+                        
+                        <!-- App Icon -->
+                        <TextBlock Text="🎬" 
+                                 FontSize="64" 
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,20"/>
+
+                        <!-- App Title -->
+                        <TextBlock Text="Video Subtitle Generator"
+                                 FontSize="24"
+                                 FontWeight="Bold"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,10"/>
+
+                        <!-- Version -->
+                        <TextBlock Text="Version 1.0.0"
+                                 FontSize="14"
+                                 Foreground="#9E9E9E"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,10"/>
+
+                        <!-- Description -->
+                        <TextBlock Text="AI-powered subtitle generation using OpenAI Whisper"
+                                 FontSize="13"
+                                 Foreground="#757575"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,5"/>
+
+                        <!-- Copyright -->
+                        <TextBlock Text="© 2025 Your Company"
+                                 FontSize="12"
+                                 Foreground="#BDBDBD"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,30"/>
+
+                        <!-- Check for Updates Button -->
+                        <Button Content="Check for Updates"
+                              Width="150"
+                              Height="36"
+                              Style="{StaticResource SecondaryButton}"
+                              HorizontalAlignment="Center"
+                              Margin="0,0,0,40"/>
+
+                        <!-- Technologies Section -->
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="30"
+                                Width="500"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="🛠️ Technologies"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         Foreground="#2196F3"
+                                         Margin="0,0,0,15"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,5">
+                                    <TextBlock Text="•" FontSize="16" Margin="0,0,10,0"/>
+                                    <TextBlock Text="WPF (.NET 6)" FontSize="13"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,5">
+                                    <TextBlock Text="•" FontSize="16" Margin="0,0,10,0"/>
+                                    <TextBlock Text="OpenAI Whisper (Python)" FontSize="13"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,5">
+                                    <TextBlock Text="•" FontSize="16" Margin="0,0,10,0"/>
+                                    <TextBlock Text="FFmpeg" FontSize="13"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Useful Links Section -->
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="30"
+                                Width="500"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="🔗 Useful Links"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         Foreground="#2196F3"
+                                         Margin="0,0,0,15"/>
+
+                                <TextBlock Margin="0,5">
+                                    <Hyperlink NavigateUri="https://docs.example.com" 
+                                             RequestNavigate="Hyperlink_RequestNavigate">
+                                        <TextBlock Text="📚 Documentation"/>
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock Margin="0,5">
+                                    <Hyperlink NavigateUri="https://github.com/yourrepo" 
+                                             RequestNavigate="Hyperlink_RequestNavigate">
+                                        <TextBlock Text="💻 GitHub Repository"/>
+                                    </Hyperlink>
+                                </TextBlock>
+
+                                <TextBlock Margin="0,5">
+                                    <Hyperlink NavigateUri="https://github.com/yourrepo/issues" 
+                                             RequestNavigate="Hyperlink_RequestNavigate">
+                                        <TextBlock Text="🐛 Report Issue"/>
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- License Section -->
+                        <Border Background="White" 
+                                BorderBrush="#E0E0E0" 
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="30"
+                                Width="500"
+                                Margin="0,0,0,40">
+                            <StackPanel>
+                                <TextBlock Text="📝 License: MIT"
+                                         FontSize="16"
+                                         FontWeight="SemiBold"
+                                         Foreground="#2196F3"
+                                         HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- Bottom Action Buttons -->
+        <Border Grid.Row="1" 
+                Background="White"
+                BorderBrush="#E0E0E0" 
+                BorderThickness="0,1,0,0"
+                Padding="20,15">
+            <Grid>
+                <StackPanel Orientation="Horizontal" 
+                          HorizontalAlignment="Left">
+                    <Button Content="Khôi phục mặc định"
+                          Width="150"
+                          Height="40"
+                          Command="{Binding RestoreDefaultsCommand}"
+                          Style="{StaticResource SecondaryButton}"
+                          Margin="0,0,10,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" 
+                          HorizontalAlignment="Right">
+                    <Button Content="Hủy bỏ"
+                          Width="100"
+                          Height="40"
+                          Command="{Binding CancelCommand}"
+                          Style="{StaticResource SecondaryButton}"
+                          Margin="0,0,10,0"
+                          Click="CancelButton_Click"/>
+                    <Button Content="Kiểm tra cấu hình"
+                          Width="160"
+                          Height="40"
+                          Command="{Binding VerifyConfigCommand}"
+                          Style="{StaticResource SecondaryButton}"
+                          Margin="0,0,10,0"/>
+                    <Button Content="Lưu"
+                          Width="100"
+                          Height="40"
+                          Command="{Binding SaveCommand}"
+                          Style="{StaticResource PrimaryButton}"
+                          Click="SaveButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

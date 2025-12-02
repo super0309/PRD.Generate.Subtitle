@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "oQp+xsSHjTQ=",
+  "success": true,
+  "projectFilePath": "C:\\Project\\PRD.Generate.Subttitle\\src\\VideoSubtitleGenerator.Infrastructure\\VideoSubtitleGenerator.Infrastructure.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\QUY NGUYEN\\.nuget\\packages\\system.diagnostics.eventlog\\10.0.0\\system.diagnostics.eventlog.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,72 @@
+[2025-12-02 23:12:18] [Info] Log directory: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\Logs
+[2025-12-02 23:12:18] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:12:18] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:12:18] [Info] ✓ Python: C:\Users\QUY NGUYEN\AppData\Local\Programs\Python\Python313\python.exe
+[2025-12-02 23:12:18] [Info] ✓ Script: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\python-worker\process_media.py
+[2025-12-02 23:12:18] [Info] ✓ FFmpeg: C:\ffmpeg\bin\ffmpeg.exe
+[2025-12-02 23:12:18] [Info] ✓ Configuration saved
+[2025-12-02 23:12:18] [Info] 💡 Output directory not set - subtitles will be saved with video files
+[2025-12-02 23:12:18] [Info] Output directory not specified - subtitles will be saved with video files
+[2025-12-02 23:12:18] [Info] ✓ Configuration validated successfully
+[2025-12-02 23:12:38] [Info] Settings saved - Revalidating configuration...
+[2025-12-02 23:12:38] [Info] Output directory not specified - subtitles will be saved with video files
+[2025-12-02 23:12:38] [Info] ✓ Configuration validated successfully
+[2025-12-02 23:12:55] [Info] Added: Module.6.3.Service Management.mpeg
+[2025-12-02 23:12:58] [Info] StartProcessingAsync called - DEBUG
+[2025-12-02 23:13:05] [Info] Starting processing in Sequential mode with 1 job(s)...
+[2025-12-02 23:13:05] [Info] Starting job orchestration in Sequential mode
+[2025-12-02 23:13:05] [Debug] Using FFmpeg at: C:\ffmpeg\bin\ffmpeg.exe
+[2025-12-02 23:13:06] [Info] FFmpeg validated successfully: C:\ffmpeg\bin\ffmpeg.exe
+[2025-12-02 23:13:06] [Info] Starting sequential processing
+[2025-12-02 23:13:06] [Info] Starting job: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:06] [Info] Converting video to WAV: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:06] [Debug] Video duration: 212.21 seconds
+[2025-12-02 23:13:06] [Debug] Executing: C:\ffmpeg\bin\ffmpeg.exe -i "D:\TRY_CONVERT\old\Module.6.3.Service Management.mpeg" -ar 16000 -ac 1 -y "D:\TRY_CONVERT\old\Module.6.3.Service Management.wav"
+[2025-12-02 23:13:06] [Info] Conversion completed: Module.6.3.Service Management.wav
+[2025-12-02 23:13:06] [Info] Conversion completed for: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:06] [Info] Starting processing: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:07] [Warning] Python stderr: CRITICAL:root:
+[2025-12-02 23:13:07] [Warning] Python stderr: CRITICAL:root:======================================================================
+[2025-12-02 23:13:07] [Warning] Python stderr: CRITICAL:root:\U0001f4a5 FATAL ERROR: Fatal error: name 'setup_logging' is not defined
+[2025-12-02 23:13:07] [Warning] Python stderr: CRITICAL:root:======================================================================
+[2025-12-02 23:13:07] [Warning] Python stderr: Fatal error: name 'setup_logging' is not defined
+[2025-12-02 23:13:07] [Warning] Python stderr: ERROR:root:\u274c FAILED: Fatal error: name 'setup_logging' is not defined
+[2025-12-02 23:13:07] [Error] Processing failed with exit code 1: CRITICAL:root:
+CRITICAL:root:======================================================================
+CRITICAL:root:\U0001f4a5 FATAL ERROR: Fatal error: name 'setup_logging' is not defined
+CRITICAL:root:======================================================================
+Fatal error: name 'setup_logging' is not defined
+ERROR:root:\u274c FAILED: Fatal error: name 'setup_logging' is not defined
+
+[2025-12-02 23:13:07] [Info] Transcription completed for: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:07] [Debug] Deleted WAV file: D:\TRY_CONVERT\old\Module.6.3.Service Management.wav
+[2025-12-02 23:13:07] [Info] ✓ Completed: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:07] [Info] Job completed successfully: Module.6.3.Service Management.mpeg
+[2025-12-02 23:13:07] [Debug] No more jobs in queue
+[2025-12-02 23:13:07] [Info] Job orchestration completed
+[2025-12-02 23:13:07] [Info] Processing completed.
+[2025-12-02 23:17:37] [Info] Log directory: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\Logs
+[2025-12-02 23:17:37] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:17:37] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:17:37] [Info] ✓ Python: C:\Users\QUY NGUYEN\AppData\Local\Programs\Python\Python313\python.exe
+[2025-12-02 23:17:37] [Info] ✓ Script: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\python-worker\process_media.py
+[2025-12-02 23:17:37] [Info] ✓ FFmpeg: C:\ffmpeg\bin\ffmpeg.exe
+[2025-12-02 23:17:37] [Info] ✓ Configuration saved
+[2025-12-02 23:17:37] [Info] 💡 Output directory not set - subtitles will be saved with video files
+[2025-12-02 23:17:37] [Info] Output directory not specified - subtitles will be saved with video files
+[2025-12-02 23:17:37] [Info] ✓ Configuration validated successfully
+[2025-12-02 23:18:03] [Info] Settings saved - Revalidating configuration...
+[2025-12-02 23:18:03] [Info] Output directory not specified - subtitles will be saved with video files
+[2025-12-02 23:18:03] [Info] ✓ Configuration validated successfully
+[2025-12-02 23:32:00] [Info] Log directory: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\Logs
+[2025-12-02 23:32:00] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:32:00] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:32:00] [Info] ✓ Python: C:\Users\QUY NGUYEN\AppData\Local\Programs\Python\Python313\python.exe
+[2025-12-02 23:32:00] [Info] ✓ Script: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\python-worker\process_media.py
+[2025-12-02 23:32:00] [Info] ✓ FFmpeg: C:\ffmpeg\bin\ffmpeg.exe
+[2025-12-02 23:32:50] [Info] Log directory: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\Logs
+[2025-12-02 23:32:50] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:32:50] [Info] Application started - Click 'Add Files' to begin
+[2025-12-02 23:32:50] [Info] ✓ Python: C:\Users\QUY NGUYEN\AppData\Local\Programs\Python\Python313\python.exe
+[2025-12-02 23:32:50] [Info] ✓ Script: C:\Project\SubtitleGenerate\src\VideoSubtitleGenerator.UI.Wpf\bin\Debug\net6.0-windows\python-worker\process_media.py
+[2025-12-02 23:32:50] [Info] ✓ FFmpeg: C:\ffmpeg\bin\ffmpeg.exe

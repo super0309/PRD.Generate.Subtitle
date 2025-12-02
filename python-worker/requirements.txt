@@ -1,0 +1,12 @@
+# Video Subtitle Generator - Python Dependencies
+
+# Core dependencies
+openai-whisper>=20231117
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# FFmpeg Python wrapper (optional, we use subprocess)
+# ffmpeg-python>=0.2.0
+
+# Additional utilities
+numpy>=1.24.0

@@ -1,0 +1,24 @@
+﻿<Application x:Class="VideoSubtitleGenerator.UI.Wpf.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:VideoSubtitleGenerator.UI.Wpf"
+             xmlns:converters="clr-namespace:VideoSubtitleGenerator.UI.Wpf.Converters"
+             StartupUri="UI/MainWindow.xaml" >
+    <Application.Resources>
+        <!-- Value Converters -->
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
+        <converters:StatusToTextConverter x:Key="StatusToTextConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:InvertedBoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter"/>
+        <converters:TimeSpanConverter x:Key="TimeSpanConverter"/>
+        <converters:TimeSpanToShortStringConverter x:Key="TimeSpanToShortStringConverter"/>
+        <converters:FileNameConverter x:Key="FileNameConverter"/>
+        <converters:FileSizeConverter x:Key="FileSizeConverter"/>
+        <converters:PathToDirectoryConverter x:Key="PathToDirectoryConverter"/>
+        <converters:ProgressToWidthConverter x:Key="ProgressToWidthConverter"/>
+        <converters:ProgressToPercentageConverter x:Key="ProgressToPercentageConverter"/>
+        <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
+        <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter"/>
+    </Application.Resources>
+</Application>
