@@ -1,5 +1,6 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using VideoSubtitleGenerator.Core;
@@ -18,10 +19,60 @@ public partial class App : Application
 
     public App()
     {
-        // Configure DI container
-        var services = new ServiceCollection();
-        ConfigureServices(services);
-        ServiceProvider = services.BuildServiceProvider();
+        try
+        {
+            // Handle unhandled exceptions
+            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            
+            // Configure DI container
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            ServiceProvider = services.BuildServiceProvider();
+            
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_constructor_success.log"), 
+                $"App constructor completed successfully at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        }
+        catch (Exception ex)
+        {
+            Utilities.WriteToLog(ex);
+            var errorMsg = $"App Constructor Exception:\n\n" +
+                           $"Type: {ex.GetType().Name}\n" +
+                           $"Message: {ex.Message}\n\n" +
+                           $"Inner: {ex.InnerException?.Message}\n\n" +
+                           $"Stack:\n{ex.StackTrace}";
+            
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_constructor.log"), errorMsg);
+            MessageBox.Show(errorMsg, "Constructor Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Environment.Exit(1);
+        }
+    }
+    
+    private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        var errorMsg = $"Unhandled UI Exception:\n\n" +
+                       $"Type: {e.Exception.GetType().Name}\n" +
+                       $"Message: {e.Exception.Message}\n\n" +
+                       $"Inner: {e.Exception.InnerException?.Message}\n\n" +
+                       $"Stack:\n{e.Exception.StackTrace}";
+        
+        File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_ui.log"), errorMsg);
+        MessageBox.Show(errorMsg, "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        e.Handled = true;
+        Shutdown(1);
+    }
+    
+    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        var ex = e.ExceptionObject as Exception;
+        var errorMsg = $"Unhandled Domain Exception:\n\n" +
+                       $"Type: {ex?.GetType().Name}\n" +
+                       $"Message: {ex?.Message}\n\n" +
+                       $"Inner: {ex?.InnerException?.Message}\n\n" +
+                       $"Stack:\n{ex?.StackTrace}";
+        
+        File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_domain.log"), errorMsg);
+        MessageBox.Show(errorMsg, "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -30,52 +81,56 @@ public partial class App : Application
 
         try
         {
-            System.Diagnostics.Debug.WriteLine("=== App.OnStartup START ===");
-            System.Diagnostics.Debug.WriteLine($"ServiceProvider is null: {ServiceProvider == null}");
+            File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                $"\n[{DateTime.Now:HH:mm:ss}] OnStartup START\n");
+            
+            File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                $"[{DateTime.Now:HH:mm:ss}] ServiceProvider null? {ServiceProvider == null}\n");
             
             // Resolve MainWindow from DI container
-            System.Diagnostics.Debug.WriteLine("Attempting to resolve MainWindow...");
+            File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                $"[{DateTime.Now:HH:mm:ss}] Attempting to resolve MainWindow...\n");
+            
             var mainWindow = ServiceProvider?.GetRequiredService<MainWindow>();
-            System.Diagnostics.Debug.WriteLine($"MainWindow resolved: {mainWindow != null}");
+            
+            File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                $"[{DateTime.Now:HH:mm:ss}] MainWindow resolved: {mainWindow != null}\n");
             
             if (mainWindow != null)
             {
-                System.Diagnostics.Debug.WriteLine("Showing MainWindow...");
+                File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                    $"[{DateTime.Now:HH:mm:ss}] Calling mainWindow.Show()...\n");
+                
                 mainWindow.Show();
-                System.Diagnostics.Debug.WriteLine("=== App.OnStartup SUCCESS ===");
+                
+                File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                    $"[{DateTime.Now:HH:mm:ss}] OnStartup SUCCESS\n");
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("✗ ServiceProvider returned null!");
-                MessageBox.Show(
-                    "Failed to initialize application: ServiceProvider is null",
-                    "Startup Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                var msg = "ServiceProvider returned null!";
+                File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "onstartup.log"), 
+                    $"[{DateTime.Now:HH:mm:ss}] ERROR: {msg}\n");
+                MessageBox.Show(msg, "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(1);
             }
         }
         catch (Exception ex)
         {
-            Utilities.WriteToLog(ex);
-            System.Diagnostics.Debug.WriteLine("=== App.OnStartup EXCEPTION ===");
-            System.Diagnostics.Debug.WriteLine($"Exception Type: {ex.GetType().FullName}");
-            System.Diagnostics.Debug.WriteLine($"Message: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack Trace:\n{ex.StackTrace}");
+            var errorMsg = $"[{DateTime.Now:HH:mm:ss}] EXCEPTION in OnStartup:\n" +
+                           $"Type: {ex.GetType().FullName}\n" +
+                           $"Message: {ex.Message}\n" +
+                           $"Inner: {ex.InnerException?.Message}\n" +
+                           $"Stack:\n{ex.StackTrace}\n";
             
-            if (ex.InnerException != null)
-            {
-                System.Diagnostics.Debug.WriteLine($"\nInner Exception: {ex.InnerException.GetType().FullName}");
-                System.Diagnostics.Debug.WriteLine($"Inner Message: {ex.InnerException.Message}");
-                System.Diagnostics.Debug.WriteLine($"Inner Stack:\n{ex.InnerException.StackTrace}");
-            }
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash_onstartup.log"), errorMsg);
             
             MessageBox.Show(
                 $"Failed to start application:\n\n" +
                 $"Error: {ex.GetType().Name}\n" +
                 $"Message: {ex.Message}\n\n" +
                 $"Inner: {ex.InnerException?.Message}\n\n" +
-                $"See Output window for full stack trace.",
+                $"See crash_onstartup.log for details.",
                 "Startup Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);

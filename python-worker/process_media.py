@@ -16,6 +16,50 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
+# Try to import config module (optional)
+try:
+    import config
+    from config import apply_defaults, validate_config
+    CONFIG_MODULE_AVAILABLE = True
+except ImportError:
+    CONFIG_MODULE_AVAILABLE = False
+    logging.debug("ℹ️  config.py module not available - using defaults")
+
+
+def setup_logging(log_dir: str = "logs"):
+    """Setup logging configuration"""
+    try:
+        # Create log directory if it doesn't exist
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # Generate log filename with timestamp
+        log_filename = f"worker_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        log_filepath = os.path.join(log_dir, log_filename)
+        
+        # Configure logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='[%(asctime)s] [%(levelname)s] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.FileHandler(log_filepath, encoding='utf-8'),
+                logging.StreamHandler(sys.stderr)  # Also log to stderr for C# to capture
+            ]
+        )
+        
+        logging.info(f"📁 Log file: {log_filepath}")
+        
+    except Exception as e:
+        # Fallback to basic logging if file creation fails
+        logging.basicConfig(
+            level=logging.INFO,
+            format='[%(asctime)s] [%(levelname)s] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[logging.StreamHandler(sys.stderr)]
+        )
+        logging.warning(f"⚠️  Could not create log file: {e}")
+
+
 def report_progress(phase: str, percent: int, message: str):
     """Report progress to stdout as JSON for C# to parse"""
     progress = {
@@ -219,10 +263,26 @@ def transcribe_audio(wav_file: str, output_file: str, config: Dict[str, Any]) ->
         language = config.get("language", "English")
         original_language = language
         
-        if language.lower() == "auto" or language.lower() == "english":
+        # Map language to Whisper language codes
+        if language.lower() == "auto":
             language = None  # Auto-detect
+        elif language.lower() == "english":
+            language = "en"  # Force English
         elif language.lower() == "vietnamese":
-            language = "vi"
+            language = "vi"  # Force Vietnamese
+        elif language.lower() == "chinese":
+            language = "zh"
+        elif language.lower() == "spanish":
+            language = "es"
+        elif language.lower() == "french":
+            language = "fr"
+        elif language.lower() == "german":
+            language = "de"
+        elif language.lower() == "japanese":
+            language = "ja"
+        elif language.lower() == "korean":
+            language = "ko"
+        # Add more languages as needed
         
         task = config.get("task", "transcribe")  # transcribe or translate
         fp16 = config.get("fp16", False) and device == "cuda"

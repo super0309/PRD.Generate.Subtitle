@@ -33,6 +33,12 @@ public class PythonWorkerService : IPythonWorkerService
 
         try
         {
+            _logService.LogInfo("============================================================");
+            _logService.LogInfo($"🚀 PythonWorkerService.ProcessAsync CALLED");
+            _logService.LogInfo($"📁 Input file: {job.InputFilePath}");
+            _logService.LogInfo($"📝 Job ID: {job.Id}");
+            _logService.LogInfo($"⏰ Start time: {startTime:yyyy-MM-dd HH:mm:ss}");
+            _logService.LogInfo("============================================================");
             _logService.LogInfo($"Starting processing: {Path.GetFileName(job.InputFilePath)}");
 
             // Prepare arguments

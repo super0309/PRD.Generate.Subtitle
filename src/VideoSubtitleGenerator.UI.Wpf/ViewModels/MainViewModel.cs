@@ -861,8 +861,22 @@ public class MainViewModel : ViewModelBase
             }
             
             // Step 5: ALWAYS save settings.json (ensure file always exists)
-            _settingsService.SaveSettingsAsync(settings).GetAwaiter().GetResult();
-            AddLog("✓ Configuration saved");
+            // NOTE: Cannot use async in constructor, so we save synchronously
+            try
+            {
+                var settingsDir = Path.Combine(appDataPath, "VideoSubtitleGenerator");
+                Directory.CreateDirectory(settingsDir);
+                
+                var json = System.Text.Json.JsonSerializer.Serialize(settings, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                System.IO.File.WriteAllText(Path.Combine(settingsDir, "settings.json"), json);
+                
+                AddLog("✓ Configuration saved");
+            }
+            catch (Exception saveEx)
+            {
+                Utilities.WriteToLog(saveEx);
+                AddLog($"⚠️ Could not save settings: {saveEx.Message}");
+            }
             
             // Check output directory
             if (string.IsNullOrWhiteSpace(settings.Processing.OutputDirectory))

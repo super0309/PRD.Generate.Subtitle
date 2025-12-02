@@ -35,7 +35,7 @@ public partial class ProcessingModeDialog : Window
             MaxParallelJobs = int.Parse(((System.Windows.Controls.ComboBoxItem)cmbMaxParallelJobs.SelectedItem).Content.ToString()!);
         }
         
-        // Get remember choice
+        // Get remember choicefv
         RememberChoice = chkRememberChoice.IsChecked == true;
         
         DialogResult = true;
