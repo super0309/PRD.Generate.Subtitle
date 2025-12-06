@@ -48,7 +48,7 @@ public class PythonWorkerService : IPythonWorkerService
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = _settings.Python.PythonExePath,
-                Arguments = args,
+                Arguments = $"-u {args}",  // -u flag for unbuffered output
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -104,9 +104,59 @@ public class PythonWorkerService : IPythonWorkerService
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
+            // Set up file-based progress polling as reliable fallback
+            // Progress file is written to the same directory as the Python script
+            var scriptDir = Path.GetDirectoryName(Path.GetFullPath(_settings.Python.ScriptPath)) ?? 
+                           Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "python-worker");
+            var progressFile = Path.Combine(scriptDir, $"{job.Id}_progress.json");
+            
+            _logService.LogDebug($"📝 Polling progress file at: {progressFile}");
+            
+            var progressTimer = new System.Timers.Timer(500); // Poll every 500ms
+            progressTimer.Elapsed += (s, e) =>
+            {
+                try
+                {
+                    if (File.Exists(progressFile))
+                    {
+                        var json = File.ReadAllText(progressFile);
+                        var progressData = JsonSerializer.Deserialize<ProgressMessage>(json);
+                        if (progressData != null && progress != null)
+                        {
+                            progress.Report(new JobProgress
+                            {
+                                Phase = MapPhase(progressData.Phase),
+                                Percent = progressData.Percent,
+                                Message = progressData.Message
+                            });
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore errors (file might be locked during write)
+                }
+            };
+            progressTimer.Start();
+
             // Wait for process to complete or cancellation
             var completionTask = Task.Run(() => process.WaitForExit(), cancellationToken);
             await completionTask;
+
+            // Stop timer and cleanup progress file
+            progressTimer.Stop();
+            progressTimer.Dispose();
+            try
+            {
+                if (File.Exists(progressFile))
+                {
+                    File.Delete(progressFile);
+                }
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -210,6 +260,7 @@ public class PythonWorkerService : IPythonWorkerService
         {
             var config = new
             {
+                job_id = job.Id.ToString(),
                 input_file = job.InputFilePath,
                 output_dir = job.OutputDirectory,
                 ffmpeg_path = _settings.FFmpeg.ExecutablePath,

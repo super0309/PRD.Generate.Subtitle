@@ -12,18 +12,80 @@ import argparse
 import subprocess
 import logging
 import traceback
+import uuid
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
+# Try to import config module (optional)
+try:
+    import config
+    from config import apply_defaults, validate_config
+    CONFIG_MODULE_AVAILABLE = True
+except ImportError:
+    CONFIG_MODULE_AVAILABLE = False
+    logging.debug("ℹ️  config.py module not available - using defaults")
+
+# Global variable for job ID (used in progress reporting)
+job_id = None
+
+
+def setup_logging(log_dir: str = "logs"):
+    """Setup logging configuration"""
+    try:
+        # Create log directory if it doesn't exist
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # Generate log filename with timestamp
+        log_filename = f"worker_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+        log_filepath = os.path.join(log_dir, log_filename)
+        
+        # Configure logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='[%(asctime)s] [%(levelname)s] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.FileHandler(log_filepath, encoding='utf-8'),
+                logging.StreamHandler(sys.stderr)  # Also log to stderr for C# to capture
+            ]
+        )
+        
+        logging.info(f"📁 Log file: {log_filepath}")
+        
+    except Exception as e:
+        # Fallback to basic logging if file creation fails
+        logging.basicConfig(
+            level=logging.INFO,
+            format='[%(asctime)s] [%(levelname)s] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[logging.StreamHandler(sys.stderr)]
+        )
+        logging.warning(f"⚠️  Could not create log file: {e}")
+
+
 def report_progress(phase: str, percent: int, message: str):
-    """Report progress to stdout as JSON for C# to parse"""
-    progress = {
+    logging.info(f"📊 REPORT_PROGRESS CALLED: {phase} {percent}% - job_id={job_id}")
+    """Report progress to stdout as JSON for C# to parse, AND write to progress file"""
+    progress = 
+    {
         "phase": phase,
         "percent": percent,
-        "message": message
+        "message": message,
+        "timestamp": datetime.now().isoformat()
     }
+    
+    # Output to stdout (original method)
     print(json.dumps(progress), flush=True)
+    
+    # ALSO write to progress file for reliable reading
+    try:
+        if job_id is not None:
+            progress_file = os.path.join(os.path.dirname(sys.argv[0]), f"{job_id}_progress.json")
+            with open(progress_file, 'w', encoding='utf-8') as f:
+                json.dump(progress, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logging.warning(f"Could not write progress file: {e}")
 
 
 def report_result(success: bool, wav_file: Optional[str] = None, 
@@ -219,10 +281,26 @@ def transcribe_audio(wav_file: str, output_file: str, config: Dict[str, Any]) ->
         language = config.get("language", "English")
         original_language = language
         
-        if language.lower() == "auto" or language.lower() == "english":
+        # Map language to Whisper language codes
+        if language.lower() == "auto":
             language = None  # Auto-detect
+        elif language.lower() == "english":
+            language = "en"  # Force English
         elif language.lower() == "vietnamese":
-            language = "vi"
+            language = "vi"  # Force Vietnamese
+        elif language.lower() == "chinese":
+            language = "zh"
+        elif language.lower() == "spanish":
+            language = "es"
+        elif language.lower() == "french":
+            language = "fr"
+        elif language.lower() == "german":
+            language = "de"
+        elif language.lower() == "japanese":
+            language = "ja"
+        elif language.lower() == "korean":
+            language = "ko"
+        # Add more languages as needed
         
         task = config.get("task", "transcribe")  # transcribe or translate
         fp16 = config.get("fp16", False) and device == "cuda"
@@ -237,13 +315,37 @@ def transcribe_audio(wav_file: str, output_file: str, config: Dict[str, Any]) ->
         # Transcribe
         logging.info("🚀 Starting Whisper transcription...")
         start_time = datetime.now()
-        result = model.transcribe(
-            wav_file,
-            language=language,
-            task=task,
-            fp16=fp16,
-            verbose=False
-        )
+        
+        # Start a thread to report estimated progress during transcription
+        import threading
+        stop_progress = threading.Event()
+        
+        def report_transcription_progress():
+            """Report estimated progress during transcription"""
+            progress = 70
+            while not stop_progress.is_set() and progress < 89:
+                stop_progress.wait(5)  # Wait 5 seconds between updates
+                if not stop_progress.is_set():
+                    progress = min(89, progress + 3)  # Increment by 3% every 5 seconds
+                    elapsed = (datetime.now() - start_time).total_seconds()
+                    report_progress("transcribing", progress, f"Transcribing audio... ({elapsed:.0f}s elapsed)")
+        
+        progress_thread = threading.Thread(target=report_transcription_progress, daemon=True)
+        progress_thread.start()
+        
+        try:
+            result = model.transcribe(
+                wav_file,
+                language=language,
+                task=task,
+                fp16=fp16,
+                verbose=False
+            )
+        finally:
+            # Stop progress reporting thread
+            stop_progress.set()
+            progress_thread.join(timeout=1)
+        
         duration = (datetime.now() - start_time).total_seconds()
         
         logging.info(f"✅ Transcription completed in {duration:.2f} seconds")
@@ -605,6 +707,12 @@ def main():
             config = json.loads(config_json)
             logging.info("✅ Configuration decoded successfully")
             logging.debug(f"📋 Configuration keys: {list(config.keys())}")
+            
+            # Set global job_id for progress reporting
+            global job_id
+            job_id = config.get('job_id', str(uuid.uuid4()))
+            logging.info(f"🆔 Job ID: {job_id}")
+            
         except Exception as e:
             error_msg = f"Failed to decode configuration: {str(e)}"
             logging.error(f"❌ {error_msg}")
