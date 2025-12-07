@@ -17,6 +17,9 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
+# Disable tqdm progress bars globally (Whisper uses tqdm)
+os.environ['TQDM_DISABLE'] = '1'
+
 # Try to import config module (optional)
 try:
     import config
@@ -33,19 +36,28 @@ job_id = None
 def setup_logging(log_dir: str = "logs"):
     """Setup logging configuration"""
     try:
+        # Log the paths for debugging
+        print(f"🔍 DEBUG: Current working directory: {os.getcwd()}", file=sys.stderr, flush=True)
+        print(f"🔍 DEBUG: Script location: {os.path.abspath(__file__)}", file=sys.stderr, flush=True)
+        print(f"🔍 DEBUG: Log directory (input): {log_dir}", file=sys.stderr, flush=True)
+        
         # Create log directory if it doesn't exist
-        os.makedirs(log_dir, exist_ok=True)
+        log_dir_abs = os.path.abspath(log_dir)
+        print(f"🔍 DEBUG: Log directory (absolute): {log_dir_abs}", file=sys.stderr, flush=True)
+        os.makedirs(log_dir_abs, exist_ok=True)
         
         # Generate log filename with timestamp
         log_filename = f"worker_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-        log_filepath = os.path.join(log_dir, log_filename)
+        log_filepath = os.path.join(log_dir_abs, log_filename)
+        print(f"🔍 DEBUG: Log file path: {log_filepath}", file=sys.stderr, flush=True)
         
         # Configure logging
         logging.basicConfig(
             level=logging.INFO,
             format='[%(asctime)s] [%(levelname)s] %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
-            handlers=[
+            handlers=
+            [
                 logging.FileHandler(log_filepath, encoding='utf-8'),
                 logging.StreamHandler(sys.stderr)  # Also log to stderr for C# to capture
             ]
@@ -85,10 +97,17 @@ def report_progress(phase: str, percent: int, message: str):
             script_dir = os.path.dirname(os.path.abspath(__file__))
             progress_file = os.path.join(script_dir, f"{job_id}_progress.json")
             
+            print(f"🔍 DEBUG: Script dir for progress: {script_dir}", file=sys.stderr, flush=True)
+            print(f"🔍 DEBUG: Progress file path: {progress_file}", file=sys.stderr, flush=True)
             logging.debug(f"📝 Writing progress to: {progress_file}")
+            
             with open(progress_file, 'w', encoding='utf-8') as f:
                 json.dump(progress, f, ensure_ascii=False, indent=2)
+            print(f"✅ DEBUG: Progress file written successfully", file=sys.stderr, flush=True)
+        else:
+            print(f"⚠️  DEBUG: job_id is None, cannot write progress file", file=sys.stderr, flush=True)
     except Exception as e:
+        print(f"❌ DEBUG: Error writing progress file: {e}", file=sys.stderr, flush=True)
         logging.warning(f"⚠️  Could not write progress file: {e}")
 
 
@@ -685,8 +704,22 @@ def main():
     parser.add_argument("--config", required=True, help="Base64 encoded JSON configuration")
     parser.add_argument("--log-dir", default="logs", help="Directory for log files")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--debug", action="store_true", help="Wait for debugger to attach")
     
     args = parser.parse_args()
+    
+    # Enable remote debugging if --debug flag is set
+    if args.debug:
+        try:
+            import debugpy
+            debugpy.listen(("localhost", 5678))
+            print("🐛 Waiting for debugger to attach on port 5678...", file=sys.stderr, flush=True)
+            debugpy.wait_for_client()
+            print("✅ Debugger attached!", file=sys.stderr, flush=True)
+        except ImportError:
+            print("⚠️  debugpy not installed. Run: pip install debugpy", file=sys.stderr, flush=True)
+        except Exception as e:
+            print(f"⚠️  Failed to start debugpy: {e}", file=sys.stderr, flush=True)
     
     try:
         # Setup logging

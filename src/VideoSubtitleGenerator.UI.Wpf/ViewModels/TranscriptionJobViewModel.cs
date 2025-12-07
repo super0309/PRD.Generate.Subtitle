@@ -347,6 +347,11 @@ public class TranscriptionJobViewModel : ViewModelBase
         {
             ProgressMessage = message;
         }
+        
+        // Force UI refresh
+        OnPropertyChanged(nameof(Progress));
+        OnPropertyChanged(nameof(ProgressText));
+        OnPropertyChanged(nameof(ProgressMessage));
     }
 
     /// <summary>

@@ -27,9 +27,11 @@
   <!-- Copy python-worker folder to output directory -->
   <Target Name="CopyPythonWorker" AfterTargets="Build">
     <ItemGroup>
-      <PythonWorkerFiles Include="..\..\python-worker\**\*.*" />
+      <PythonWorkerFiles Include="..\..\python-worker\**\*.*" Exclude="..\..\python-worker\**\__pycache__\**;..\..\python-worker\**\*.pyc;..\..\python-worker\logs\**;..\..\python-worker\**\*_progress.json" />
     </ItemGroup>
-    <Copy SourceFiles="@(PythonWorkerFiles)" DestinationFolder="$(OutputPath)python-worker\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <!-- Always copy Python files to ensure latest version -->
+    <Copy SourceFiles="@(PythonWorkerFiles)" DestinationFolder="$(OutputPath)python-worker\%(RecursiveDir)" SkipUnchangedFiles="false" />
+    <Message Text="✅ Copied Python worker files" Importance="high" />
   </Target>
 
 </Project>

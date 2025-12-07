@@ -38,6 +38,7 @@ public class PythonWorkerService : IPythonWorkerService
             _logService.LogInfo($"📁 Input file: {job.InputFilePath}");
             _logService.LogInfo($"📝 Job ID: {job.Id}");
             _logService.LogInfo($"⏰ Start time: {startTime:yyyy-MM-dd HH:mm:ss}");
+            _logService.LogInfo($"📊 Progress reporter: {(progress == null ? "NULL" : "NOT NULL")}");
             _logService.LogInfo("============================================================");
             _logService.LogInfo($"Starting processing: {Path.GetFileName(job.InputFilePath)}");
 
@@ -66,27 +67,74 @@ public class PythonWorkerService : IPythonWorkerService
                 {
                     outputBuilder.AppendLine(e.Data);
                     
+                    _logService.LogDebug($"📥 STDOUT: {e.Data}");
+                    
                     // Try to parse progress updates
                     if (e.Data.StartsWith("{") && progress != null)
                     {
                         try
                         {
-                            var progressUpdate = JsonSerializer.Deserialize<ProgressMessage>(e.Data);
-                            if (progressUpdate != null)
+                            _logService.LogDebug($"🔍 Attempting to parse JSON: {e.Data}");
+
+                            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                            
+                            // Parse to PythonProcessJob and save to file
+                            var pythonJob = JsonSerializer.Deserialize<PythonProcessJob>(e.Data, options);
+                            if (pythonJob != null)
                             {
+                                // Set job_id from current job
+                                pythonJob.job_id = job.Id.GetHashCode(); // Convert Guid to int
+                                
+                                // Save to file in same directory as log
+                                try
+                                {
+                                    // Get log directory from settings or use default
+                                    var logPath = _settings.Logging?.LogFilePath ?? "logs\\app.log";
+                                    var logDir = Path.GetDirectoryName(logPath);
+                                    
+                                    if (string.IsNullOrEmpty(logDir) || !Path.IsPathRooted(logDir))
+                                    {
+                                        logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+                                    }
+                                    
+                                    // Ensure directory exists
+                                    Directory.CreateDirectory(logDir);
+                                    
+                                    var jobFile = Path.Combine(logDir, $"job_{job.Id}_process.json");
+                                    var jsonContent = JsonSerializer.Serialize(pythonJob, new JsonSerializerOptions 
+                                    { 
+                                        WriteIndented = true,
+                                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                                    });
+                                    
+                                    // Overwrite file with new data
+                                    File.WriteAllText(jobFile, jsonContent);
+                                    _logService.LogDebug($"💾 Saved progress to: {jobFile}");
+                                }
+                                catch (Exception saveEx)
+                                {
+                                    _logService.LogWarning($"⚠️  Failed to save job file: {saveEx.Message}");
+                                }
+                                
+                                // Report progress to UI
+                                _logService.LogInfo($"✅ Progress parsed: {pythonJob.phase} {pythonJob.percent}%");
                                 progress.Report(new JobProgress
                                 {
-                                    Phase = MapPhase(progressUpdate.Phase),
-                                    Percent = progressUpdate.Percent,
-                                    Message = progressUpdate.Message
+                                    Phase = MapPhase(pythonJob.phase),
+                                    Percent = pythonJob.percent,
+                                    Message = pythonJob.message
                                 });
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             // Not a JSON progress message, just log it
-                            _logService.LogDebug(e.Data);
+                            _logService.LogDebug($"❌ JSON parse failed: {ex.Message}");
                         }
+                    }
+                    else if (e.Data.StartsWith("{"))
+                    {
+                        _logService.LogWarning($"⚠️  JSON detected but progress is NULL");
                     }
                 }
             };
@@ -104,6 +152,24 @@ public class PythonWorkerService : IPythonWorkerService
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
+            // Set up log monitoring thread for Whisper progress (from stderr)
+            var logMonitorCts = new CancellationTokenSource();
+            var logDir = Path.GetDirectoryName(_settings.Logging?.LogFilePath ?? "logs\\app.log");
+            if (string.IsNullOrEmpty(logDir) || !Path.IsPathRooted(logDir))
+            {
+                logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+            }
+            
+            var jobProcessFile = Path.Combine(logDir, $"job_{job.Id}_process.json");
+            
+            // Start background thread to monitor log file for Whisper progress
+            var logMonitorThread = new Thread(() => MonitorLogForWhisperProgress(job.Id, logDir, jobProcessFile, logMonitorCts.Token))
+            {
+                IsBackground = true,
+                Name = $"LogMonitor-{job.Id}"
+            };
+            logMonitorThread.Start();
+
             // Set up file-based progress polling as reliable fallback
             // Progress file is written to the same directory as the Python script
             var scriptDir = Path.GetDirectoryName(Path.GetFullPath(_settings.Python.ScriptPath)) ?? 
@@ -120,9 +186,11 @@ public class PythonWorkerService : IPythonWorkerService
                     if (File.Exists(progressFile))
                     {
                         var json = File.ReadAllText(progressFile);
-                        var progressData = JsonSerializer.Deserialize<ProgressMessage>(json);
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var progressData = JsonSerializer.Deserialize<ProgressMessage>(json, options);
                         if (progressData != null && progress != null)
                         {
+                            _logService.LogDebug($"📊 Progress from file: {progressData.Phase} {progressData.Percent}%");
                             progress.Report(new JobProgress
                             {
                                 Phase = MapPhase(progressData.Phase),
@@ -132,9 +200,10 @@ public class PythonWorkerService : IPythonWorkerService
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Ignore errors (file might be locked during write)
+                    _logService.LogDebug($"⚠️  Progress file read error: {ex.Message}");
                 }
             };
             progressTimer.Start();
@@ -142,6 +211,14 @@ public class PythonWorkerService : IPythonWorkerService
             // Wait for process to complete or cancellation
             var completionTask = Task.Run(() => process.WaitForExit(), cancellationToken);
             await completionTask;
+
+            // Stop log monitor thread
+            logMonitorCts.Cancel();
+            if (!logMonitorThread.Join(TimeSpan.FromSeconds(2)))
+            {
+                _logService.LogWarning("⚠️  Log monitor thread did not stop gracefully");
+            }
+            logMonitorCts.Dispose();
 
             // Stop timer and cleanup progress file
             progressTimer.Stop();
@@ -275,7 +352,11 @@ public class PythonWorkerService : IPythonWorkerService
             var configJson = JsonSerializer.Serialize(config);
             var configBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(configJson));
 
-            return $"\"{_settings.Python.ScriptPath}\" --config {configBase64}";
+            // Check if debugger should be enabled via environment variable
+            var enableDebug = Environment.GetEnvironmentVariable("PYTHON_DEBUG") == "1";
+            var debugFlag = enableDebug ? " --debug" : "";
+
+            return $"\"{_settings.Python.ScriptPath}\" --config {configBase64}{debugFlag}";
         }
         catch (Exception ex)
         {
@@ -329,10 +410,16 @@ public class PythonWorkerService : IPythonWorkerService
         }
     }
 
-    private ProcessingPhase MapPhase(string phase)
+    private ProcessingPhase MapPhase(string? phase)
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(phase))
+            {
+                _logService?.LogWarning("⚠️  MapPhase received null or empty phase");
+                return ProcessingPhase.Queued;
+            }
+
             return phase.ToLower() switch
             {
                 "queued" => ProcessingPhase.Queued,
@@ -349,6 +436,97 @@ public class PythonWorkerService : IPythonWorkerService
             Utilities.WriteToLog(ex);
             _logService?.LogError($"Error mapping phase '{phase}': {ex.Message}", ex);
             return ProcessingPhase.Queued;
+        }
+    }
+
+    private void MonitorLogForWhisperProgress(Guid jobId, string logDir, string jobProcessFile, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logService?.LogDebug($"🔍 Log monitor thread started for job {jobId}");
+            
+            // Find the most recent log file
+            var logFiles = Directory.GetFiles(logDir, "*.log")
+                .OrderByDescending(f => File.GetLastWriteTime(f))
+                .ToList();
+            
+            if (!logFiles.Any())
+            {
+                _logService?.LogWarning("⚠️  No log files found to monitor");
+                return;
+            }
+            
+            var logFile = logFiles.First();
+            _logService?.LogDebug($"📄 Monitoring log file: {logFile}");
+            
+            var lastPosition = 0L;
+            var whisperProgressPattern = @"(\d+)%\|[#\s]+\|\s*(\d+)/(\d+)";
+            
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var fileInfo = new FileInfo(logFile);
+                    if (fileInfo.Exists && fileInfo.Length > lastPosition)
+                    {
+                        using var fs = new FileStream(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                        fs.Seek(lastPosition, SeekOrigin.Begin);
+                        using var sr = new StreamReader(fs);
+                        
+                        string? line;
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            // Parse Whisper progress: "  8%|7         | 2548/32347"
+                            if (line.Contains("Python stderr:") && line.Contains("%|"))
+                            {
+                                var match = System.Text.RegularExpressions.Regex.Match(line, whisperProgressPattern);
+                                if (match.Success)
+                                {
+                                    var percent = int.Parse(match.Groups[1].Value);
+                                    var current = int.Parse(match.Groups[2].Value);
+                                    var total = int.Parse(match.Groups[3].Value);
+                                    
+                                    // Calculate actual transcription progress (70-95% range)
+                                    var transcriptionProgress = 70 + (percent * 25 / 100);
+                                    
+                                    var pythonJob = new PythonProcessJob
+                                    {
+                                        phase = "transcribing",
+                                        percent = transcriptionProgress,
+                                        message = $"Transcribing: {current}/{total} frames ({percent}%)",
+                                        job_id = jobId.GetHashCode()
+                                    };
+                                    
+                                    // Save to job process file
+                                    var jsonContent = JsonSerializer.Serialize(pythonJob, new JsonSerializerOptions 
+                                    { 
+                                        WriteIndented = true,
+                                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                                    });
+                                    File.WriteAllText(jobProcessFile, jsonContent);
+                                    
+                                    _logService?.LogDebug($"📊 Whisper progress: {percent}% ({current}/{total}) -> {transcriptionProgress}%");
+                                }
+                            }
+                        }
+                        
+                        lastPosition = fs.Position;
+                    }
+                    
+                    Thread.Sleep(1000); // Check every 1 second
+                }
+                catch (IOException)
+                {
+                    // File might be locked, try again
+                    Thread.Sleep(500);
+                }
+            }
+            
+            _logService?.LogDebug($"🛑 Log monitor thread stopped for job {jobId}");
+        }
+        catch (Exception ex)
+        {
+            _logService?.LogError($"❌ Log monitor thread error: {ex.Message}", ex);
         }
     }
 

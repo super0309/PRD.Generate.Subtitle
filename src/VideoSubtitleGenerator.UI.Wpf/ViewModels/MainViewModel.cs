@@ -711,12 +711,16 @@ public class MainViewModel : ViewModelBase
     {
         try
         {
+            _logService?.LogDebug($"📊 Progress event received: Job={e.Job.Id}, Phase={e.Progress.Phase}, Percent={e.Progress.Percent}%, Message={e.Progress.Message}");
+            
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // Find matching job VM
                 var jobVM = Jobs.FirstOrDefault(j => j.Job.Id == e.Job.Id);
                 if (jobVM != null)
                 {
+                    _logService?.LogDebug($"✅ Found job VM, updating progress to {e.Progress.Percent}%");
+                    
                     // Update progress
                     jobVM.SetProgress(e.Progress.Percent, e.Progress.Message);
                     jobVM.CurrentPhase = e.Progress.Phase;
@@ -732,6 +736,11 @@ public class MainViewModel : ViewModelBase
                     }
                     
                     UpdateStatistics();
+                }
+                else
+                {
+                    _logService?.LogWarning($"⚠️  Job VM not found for Job ID: {e.Job.Id}");
+                    _logService?.LogWarning($"Available Jobs: {string.Join(", ", Jobs.Select(j => j.Job.Id.ToString().Substring(0, 8)))}");
                 }
             });
         }
