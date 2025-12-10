@@ -379,6 +379,52 @@ public class PythonWorkerService : IPythonWorkerService
                     var resultData = JsonSerializer.Deserialize<ResultMessage>(line);
                     if (resultData?.Result != null)
                     {
+                        // Validate subtitle file exists and has content
+                        var subtitleFile = resultData.Result.SubtitleFile;
+                        if (!string.IsNullOrEmpty(subtitleFile) && File.Exists(subtitleFile))
+                        {
+                            var fileInfo = new FileInfo(subtitleFile);
+                            if (fileInfo.Length == 0)
+                            {
+                                _logService.LogError($"❌ Subtitle file is empty: {subtitleFile}");
+                                return new TranscriptionResult
+                                {
+                                    IsSuccess = false,
+                                    ErrorMessage = "Subtitle file was created but is empty (0 bytes)",
+                                    SubtitleFilePath = subtitleFile
+                                };
+                            }
+                            
+                            // Optionally: Validate SRT format (has at least one subtitle block)
+                            try
+                            {
+                                var content = File.ReadAllText(subtitleFile);
+                                if (!content.Contains("-->"))
+                                {
+                                    _logService.LogError($"❌ Subtitle file has no valid subtitle entries: {subtitleFile}");
+                                    return new TranscriptionResult
+                                    {
+                                        IsSuccess = false,
+                                        ErrorMessage = "Subtitle file created but contains no valid subtitle entries",
+                                        SubtitleFilePath = subtitleFile
+                                    };
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logService.LogWarning($"⚠️  Could not validate subtitle content: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            _logService.LogError($"❌ Subtitle file not found: {subtitleFile}");
+                            return new TranscriptionResult
+                            {
+                                IsSuccess = false,
+                                ErrorMessage = $"Subtitle file was not created: {subtitleFile}"
+                            };
+                        }
+                        
                         return new TranscriptionResult
                         {
                             IsSuccess = true,
@@ -390,10 +436,34 @@ public class PythonWorkerService : IPythonWorkerService
                 }
             }
 
-            // If no JSON result found, assume success and construct paths
+            // If no JSON result found, construct paths and validate
             var outputFileName = Path.GetFileNameWithoutExtension(job.InputFilePath);
             var wavPath = Path.Combine(job.OutputDirectory, $"{outputFileName}.wav");
             var subtitlePath = Path.Combine(job.OutputDirectory, $"{outputFileName}.{job.Settings.OutputFormat}");
+
+            // Check if subtitle file exists and has content
+            if (File.Exists(subtitlePath))
+            {
+                var fileInfo = new FileInfo(subtitlePath);
+                if (fileInfo.Length == 0)
+                {
+                    return new TranscriptionResult
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "Subtitle file is empty (0 bytes)",
+                        SubtitleFilePath = subtitlePath
+                    };
+                }
+            }
+            else
+            {
+                return new TranscriptionResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Subtitle file was not created",
+                    SubtitleFilePath = null
+                };
+            }
 
             return new TranscriptionResult
             {

@@ -30,6 +30,7 @@ public class MainViewModel : ViewModelBase
     private TimeSpan _totalElapsedTime;
     private TimeSpan _estimatedTimeRemaining;
     private string _logText = string.Empty;
+    private bool _isPaused;
     
     // Configuration validation
     private bool _isConfigurationValid;
@@ -207,6 +208,27 @@ public class MainViewModel : ViewModelBase
     /// Gets whether processing is currently active.
     /// </summary>
     public bool IsProcessing => _jobOrchestrator?.IsRunning == true || ProcessingCount > 0;
+
+    /// <summary>
+    /// Gets or sets whether processing is currently paused.
+    /// </summary>
+    public bool IsPaused
+    {
+        get => _isPaused;
+        set
+        {
+            if (SetProperty(ref _isPaused, value))
+            {
+                OnPropertyChanged(nameof(PauseButtonText));
+                (PauseProcessingCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the text for the Pause/Resume button.
+    /// </summary>
+    public string PauseButtonText => IsPaused ? "▶️ Resume" : "⏸️ Pause";
 
     /// <summary>
     /// Gets whether there are any selected jobs.
@@ -441,28 +463,52 @@ public class MainViewModel : ViewModelBase
     {
         try
         {
-            if (_jobOrchestrator != null)
+            if (_jobOrchestrator == null)
             {
-                _ = _jobOrchestrator.PauseAsync();
-                AddLog("Processing paused");
+                AddLog("⚠️ Job orchestrator not available");
+                return;
             }
-        }
-        catch (Exception ex)
-        {
-            Utilities.WriteToLog(ex);
-            _logService?.LogError($"Error pausing processing: {ex.Message}", ex);
-            AddLog($"ERROR: Failed to pause - {ex.Message}");
-        }
-    }
 
+            if (!IsProcessing)
+            {
+                AddLog("⚠️ No processing to pause");
+                return;
+            }
+
+            _ = _jobOrchestrator.PauseAsync();
+            AddLog("⏸️ Processing paused - jobs will complete current phase before pausing");
     private void StopProcessing()
     {
         try
         {
-            if (_jobOrchestrator != null)
+            if (_jobOrchestrator == null)
+            {
+                AddLog("⚠️ Job orchestrator not available");
+                return;
+            }
+
+            if (!IsProcessing)
+            {
+                AddLog("⚠️ No processing to stop");
+                return;
+            }
+
+            var result = MessageBox.Show(
+                "Are you sure you want to stop processing?\n\n" +
+                "This will cancel all running jobs immediately.\n" +
+                "Current progress will be lost.",
+                "Stop Processing",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
             {
                 _ = _jobOrchestrator.CancelAsync();
-                AddLog("Processing stopped - cancelling all jobs...");
+                AddLog("⏹️ Processing stopped - cancelling all jobs...");
+                
+                // Update UI state
+                IsPaused = false;
+                RaiseCanExecuteChanged();
             }
         }
         catch (Exception ex)
@@ -470,6 +516,8 @@ public class MainViewModel : ViewModelBase
             Utilities.WriteToLog(ex);
             _logService?.LogError($"Error stopping processing: {ex.Message}", ex);
             AddLog($"ERROR: Failed to stop - {ex.Message}");
+            MessageBox.Show($"Failed to stop processing:\n{ex.Message}", 
+                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -499,15 +547,52 @@ public class MainViewModel : ViewModelBase
     {
         try
         {
-            // TODO: Open default output folder
-            MessageBox.Show("Output folder will be opened", "Open Output Folder", 
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            if (_settingsService == null)
+            {
+                AddLog("⚠️ Settings service not available");
+                return;
+            }
+
+            var settings = _settingsService.LoadSettings();
+            
+            // Get output directory from settings, or use default (same as video location)
+            string outputDir = settings?.Processing?.OutputDirectory ?? string.Empty;
+            
+            // If empty, open the first completed job's output folder
+            if (string.IsNullOrWhiteSpace(outputDir))
+            {
+                var completedJob = Jobs.FirstOrDefault(j => j.IsCompleted && !string.IsNullOrEmpty(j.OutputPath));
+                if (completedJob != null && File.Exists(completedJob.OutputPath))
+                {
+                    outputDir = Path.GetDirectoryName(completedJob.OutputPath) ?? string.Empty;
+                }
+                else
+                {
+                    MessageBox.Show("No output folder found. Please complete at least one job first.", 
+                        "Output Folder", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+            }
+            
+            // Validate directory exists
+            if (!Directory.Exists(outputDir))
+            {
+                MessageBox.Show($"Output folder not found:\n{outputDir}", 
+                    "Output Folder", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            
+            // Open folder in Windows Explorer
+            System.Diagnostics.Process.Start("explorer.exe", $"\"{outputDir}\"");
+            AddLog($"📁 Opened output folder: {outputDir}");
         }
         catch (Exception ex)
         {
             Utilities.WriteToLog(ex);
             _logService?.LogError($"Error opening output folder: {ex.Message}", ex);
             AddLog($"ERROR: Failed to open output folder - {ex.Message}");
+            MessageBox.Show($"Failed to open output folder:\n{ex.Message}", 
+                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -733,6 +818,14 @@ public class MainViewModel : ViewModelBase
                     else if (e.Progress.Phase == ProcessingPhase.Transcribing)
                     {
                         jobVM.UpdateStatus(JobStatus.Transcribing, e.Progress.Message);
+                    }
+                    else if (e.Progress.Phase == ProcessingPhase.Completed)
+                    {
+                        jobVM.UpdateStatus(JobStatus.Completed, e.Progress.Message);
+                    }
+                    else if (e.Progress.Phase == ProcessingPhase.Failed)
+                    {
+                        jobVM.UpdateStatus(JobStatus.Failed, e.Progress.Message);
                     }
                     
                     UpdateStatistics();

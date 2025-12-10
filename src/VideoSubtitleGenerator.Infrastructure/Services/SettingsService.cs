@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using VideoSubtitleGenerator.Core;
 using VideoSubtitleGenerator.Core.Interfaces;
@@ -222,8 +223,23 @@ public class SettingsService : ISettingsService
                     var pythonExe = Path.Combine(path.Trim(), "python.exe");
                     if (File.Exists(pythonExe))
                     {
-                        _logService.LogInfo($"Found in PATH: {pythonExe}");
-                        return pythonExe;
+                        // Skip Windows Store alias (WindowsApps folder)
+                        if (pythonExe.Contains("WindowsApps", StringComparison.OrdinalIgnoreCase))
+                        {
+                            _logService.LogInfo($"Skipping Windows Store alias: {pythonExe}");
+                            continue;
+                        }
+                        
+                        // Validate by running python --version
+                        if (ValidatePythonExecutable(pythonExe))
+                        {
+                            _logService.LogInfo($"Found valid Python in PATH: {pythonExe}");
+                            return pythonExe;
+                        }
+                        else
+                        {
+                            _logService.LogWarning($"Found but invalid Python: {pythonExe}");
+                        }
                     }
                 }
                 catch { }
@@ -333,5 +349,44 @@ public class SettingsService : ISettingsService
             return null;
         }
     }
+    
+    /// <summary>
+    /// Validate Python executable by running --version
+    /// </summary>
+    private bool ValidatePythonExecutable(string pythonPath)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = pythonPath,
+                Arguments = "--version",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+            
+            using var process = Process.Start(startInfo);
+            if (process == null)
+                return false;
+                
+            process.WaitForExit(3000); // 3 second timeout
+            
+            // Exit code 0 means success
+            if (process.ExitCode == 0)
+            {
+                var output = process.StandardOutput.ReadToEnd();
+                _logService.LogDebug($"Python validation output: {output}");
+                return true;
+            }
+            
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logService.LogDebug($"Python validation failed for {pythonPath}: {ex.Message}");
+            return false;
+        }
+    }
 }
-
